@@ -58,6 +58,15 @@ export function getUserProfile () {
         if (!code) {
           throw new Error('Username is null')
         }
+        const isSafeString = (/^'([^'\\]|\\.)*'$/.test(code) && !code.includes('${')) || 
+                             (/^"([^"\\]|\\.)*"$/.test(code) && !code.includes('${'))
+        const isSafeNumber = /^-?\d+(\.\d+)?$/.test(code)
+        const isSafeBoolean = /^(true|false)$/.test(code)
+        const isSafeNull = code === 'null'
+
+        if (!isSafeString && !isSafeNumber && !isSafeBoolean && !isSafeNull) {
+          throw new Error('Unsafe template expression')
+        }
         username = eval(code) // eslint-disable-line no-eval
       } catch (err) {
         username = '\\' + username
